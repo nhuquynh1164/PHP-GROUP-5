@@ -1,6 +1,11 @@
 <?php
-    include_once('./model/user.classes.php');
-    include_once('./mail/mail.php');
+    // Use absolute paths to avoid include issues
+    include_once(__DIR__ . '/user.classes.php');
+    $mailPath = __DIR__ . '/../mail/mail.php';
+    if (file_exists($mailPath)) {
+        include_once($mailPath);
+    }
+
     class Authen {
 
         public function login($userName,$password) {
@@ -31,12 +36,14 @@
                 }
                 array_push($sessionCart,$arr);
                 !$checkContain ? Session::setValueSession('cart',$sessionCart) : '';
-                // !$checkContain ? array_push($_SESSION['cart'],$arr) : '';
 
                 $message = "Đăng nhập thành công";
-                $isAdmin ? header("Location: index.php?quanly=admin") : header("Location: index.php"); 
+                // Avoid header issues if output already sent
+                if (!headers_sent()) {
+                    $isAdmin ? header("Location: index.php?quanly=admin") : header("Location: index.php");
+                }
                 echo "<script type='text/javascript'>alert('$message');</script>";
-            }else {
+            } else {
                 $message = "Đăng nhập thất bại";
                 echo "<script type='text/javascript'>alert('$message');</script>";
             }
@@ -55,19 +62,27 @@
             if(!$isContain) {
                 $User->insertUser($fullName,$userName,$password,$phone,$address,$email,'0');
                 echo "<script type='text/javascript'>alert('Đăng ký thành công');</script>";
-                header("Location: index.php?quanly=login");
+                if (!headers_sent()) {
+                    header("Location: index.php?quanly=login");
+                }
                 return;
-            }else {
+            } else {
                 return "Tài khoản đã tồn tại";
             }
         }
+
         public function sendRequest($userName,$email,$randomCode) {
             $User = new User();
             $id_user = $User->checkUserForgetPassword($userName,$email);
             if($id_user) {
-                sendRequestCode($userName,$email,$randomCode);
+                // Guard against missing mail function
+                if (function_exists('sendRequestCode')) {
+                    sendRequestCode($userName,$email,$randomCode);
+                } else {
+                    echo "<script type='text/javascript'>alert('Internal error: mail sender is unavailable');</script>";
+                }
                 return $id_user;
-            }else {
+            } else {
                 echo "
                 <SCRIPT> 
                     alert('Thông tin không trùng khớp,vui lòng thử lại')
@@ -76,10 +91,11 @@
             }
             return;
         }
+
         public function verifyEmail($code,$randomCode) {
             if($code == $randomCode) {
                 return;
-            }else {
+            } else {
                 echo "
                 <SCRIPT> 
                     alert('Mã xác nhận không đúng, vui lòng thử lại')
