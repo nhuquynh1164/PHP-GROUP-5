@@ -26,7 +26,7 @@ $Slider = new Slider();
                             <p class="product-name">Bàn trang trí</p>
                             <p class="subname">Nội thất</p>
                         </div>
-                        <a href="<?php echo $row_slider['slider_link'] ?>" class="btn-shopping">Mua Ngay</a>
+                       <a href="index.php?quanly=cuahang" class="btn-shopping">Mua Ngay</a>
                     </div>
                 </div>
                 <div class="category-item right">
@@ -36,7 +36,7 @@ $Slider = new Slider();
                             <p class="product-name">Ghế tựa cao cấp</p>
                             <p class="subname">Nội thất</p>
                         </div>
-                        <a href="" class="btn-shopping">Mua Ngay</a>
+                     <a href="index.php?quanly=cuahang" class="btn-shopping">Mua Ngay</a>
                     </div>
                 </div>
             </div>
