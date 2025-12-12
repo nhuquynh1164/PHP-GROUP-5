@@ -440,3 +440,49 @@ output {
   color: white;
   background-color: var(--primary-color);
 }
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.pagination .item {
+  margin: 0 6px;
+}
+
+/* Ẩn radio */
+.pagination .input-page {
+  display: none;
+}
+
+/* Nút số */
+.pagination .button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #f2f2f2;   /* xám nhạt */
+  color: #555;
+  font-size: 1.4rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Hover */
+.pagination .button:hover {
+  background-color: #d6b27c;   /* vàng nhạt */
+  color: #fff;
+}
+
+/* Trang đang chọn */
+.pagination .input-page:checked + .button {
+  background-color: #c89b5e;   /* vàng đậm */
+  color: #fff;
+}
