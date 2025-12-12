@@ -1,0 +1,596 @@
+/* Top-Header */
+header{
+  z-index: 100;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.cut-header {
+  height: 1px;
+  background-color: #dedbdb;
+}
+
+.top-header {
+  padding: 10px 0;
+  display: flex;
+  background-color: var(--third-color);
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.title-air,
+.title-login,
+.title-phone {
+  color: var(--text-color);
+  font-size: 1.4rem;
+}
+
+.top-header .title-phone {
+  margin-left: 40%;
+}
+
+.top-header > .title-phone > a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.txt-name {
+  text-decoration: none;
+  color: var(--text-color);
+}
+.txt-name:hover {
+  transition: 0.5s linear;
+  color: var(--hover);
+}
+.top-header > .title-login > a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 1.4rem;
+}
+.top-header > .title-login > a:hover,
+.top-header > .title-phone > a:hover,
+.fa-cart-shopping:hover {
+  transition: 0.5s linear;
+  color: var(--hover);
+}
+.fa-phone,
+.fa-user,
+.fa-plane-departure,
+.fa-circle-xmark {
+  color: var(--hover);
+  padding-right: 1rem;
+  font-size: 1.4rem;
+}
+
+/* Sub-header */
+
+.sub-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* logo | menu | icon */
+  align-items: center;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 12px;
+  height: 72px;
+}
+
+
+
+.fa-angle-down {
+  padding-left: 1rem;
+  color: var(--text-color);
+}
+
+.fa-solid .fa-magnifying-glass,
+.fa-solid .fa-cart-shopping {
+  color: var(--text-color);
+}
+/* Menu */
+.menu {
+  justify-self: center;   /* ❗ CĂN GIỮA THẬT */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.active-button {
+  color: var(--hover) !important;
+  font-size: 1.7rem;
+}
+
+.menu_item {
+  margin: 0 1rem;
+  list-style: none;
+  position: relative;
+}
+.menu_item:hover .menu_child {
+  opacity: 1;
+  visibility: visible;
+}
+.menu_child::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #fff;
+}
+
+.menu_item:hover::before {
+  width: 80%;
+}
+.menu_link {
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 1rem;
+  font-size: 1.7rem;
+}
+/* ===== DROPDOWN BỘ SƯU TẬP ===== */
+.menu_child {
+  position: absolute;
+  top: calc(100% + 8px);      /* sát menu */
+  left: 50%;
+  transform: translateX(-50%);
+
+  min-width: 220px;
+  background-color: #ffffff;
+
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+
+  z-index: 999;
+}
+
+
+.menu_child_list {
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+}
+
+.menu_child_list li {
+  margin-bottom: 1rem;
+}
+.menu_child_list li a {
+  display: block;
+  padding: 10px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+
+  transition: background 0.2s ease;
+}
+
+.menu_child_list li a:hover {
+  background-color: #f2f4f3;
+  color: #2f6f55;
+}
+
+.menu_icon {
+  list-style: none;
+}
+
+.menu_link {
+  position: relative;
+  display: inline-block;
+  transition: 0.2s linear;
+}
+
+.menu_link:hover {
+  color: var(--hover);
+}
+
+/* Mobile Nav Btn Menu Bar*/
+
+.menu_overlay {
+  z-index: 100;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: none;
+  animation: fadeIn linear 0.5s;
+}
+.menu_bar_btn {
+  color: var(--text-color);
+  padding: 20px;
+  border-radius: 1rem;
+  display: none;
+}
+.menu-input:checked ~ .menu_overlay {
+  display: block;
+}
+.menu-input:checked ~ .menu-mobile {
+  opacity: 1;
+  transform: translateX(0%);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.menu-mobile {
+  z-index: 10000000000;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 32rem;
+  max-width: 100%;
+  transform: translateX(100%);
+  background-color: var(--text-color);
+  opacity: 0;
+  transition: transform 0.5s linear, opacity 0.5s linear;
+}
+
+.menu_mobile_item {
+  list-style: none;
+  margin-top: 2.4rem;
+}
+.menu_mobile_link {
+  list-style: none;
+  text-decoration: none;
+  color: var(--text-color);
+  padding: 8px 0;
+  padding-left: 3rem;
+  font-size: 1.4rem;
+}
+
+.menu-mobile-close {
+  position: absolute;
+  color: #141414;
+  font-size: 1.4rem;
+  top: 1rem;
+  right: 1rem;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  margin-left: 2rem;
+}
+
+header .icon-list {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-cart i {
+  color: var(--text-color);
+  font-size: 1.7rem;
+}
+
+.icon-user i {
+  font-size: 1.7rem;
+  color: var(--text-color);
+}
+.icon-user .login-success i {
+  color: var(--primary-color);
+}
+
+.menu-user {
+  z-index: 10;
+  display: none;
+  position: absolute;
+  top: 10%;
+  right: 9%;
+  color: black;
+  width: 200px;
+  list-style: none;
+  text-align: center;
+  background-color: #7c7c79;
+}
+.icon-user:hover .menu-user {
+  display: block;
+}
+.icon-user::before {
+  position: absolute;
+  content: "";
+  width: 200px;
+  height: 30px;
+  top: 10%;
+  right: 9%;
+}
+.menu-user li a {
+  display: block;
+  padding: 10px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+
+  transition: background 0.2s ease;
+}
+
+.menu-user li a:hover {
+  background-color: #f2f4f3;
+  color: #2f6f55;
+}
+
+
+/* Menu_sub_child */
+
+.menu_parent {
+  position: relative;
+}
+
+.sub__menu-child-link {
+  display: block;
+}
+
+
+.menu_parent:hover .sub__menu-child {
+  opacity: 1;
+  visibility: visible;
+}
+.fa-cart-shopping{
+  position: relative;
+}
+.numProCart{
+  text-align: center;
+    height: 15px;
+    border-radius: 50%;
+    color: white;
+    width: 16px;
+    background: red;
+    position: absolute;
+    top: -70%;
+    right: -60%;
+    font-size: small;
+    padding: 1px 2px 1px 1px;
+
+}
+
+.menu-user{
+  margin-top: 60px;
+}
+/* SEARCH BAR HEADER */
+.search-box {
+    display: flex;
+    align-items: center;
+
+    background-color: #ffffff;   /* ❗ xanh đậm, match header */
+     border: 2px solid #d4a45f; 
+    border-radius: 999px; 
+
+    padding: 4px 14px;
+    width: 200px;                /* ❗ gọn lại */
+    height: 36px;
+}
+
+
+.search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+
+    color: #d4a45f;
+    padding: 0 8px;
+    flex: 1;
+    font-size: 13.5px;
+}
+
+.search-box input::placeholder {
+    color: #d4a45f;              /* dịu hơn */
+}
+
+
+.search-box button {
+    border: none;
+    background: transparent;     /* ❗ bỏ nền tròn */
+    border-radius: 0;
+
+    width: auto;
+    height: auto;
+    padding: 0;
+
+    cursor: pointer;
+}
+
+
+.search-box button i {
+    color: #d4a45f;              /* icon trắng */
+    font-size: 14px;
+}
+
+header .icon-list {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* ❗ KHÔNG CHO BỊ CO */
+}
+
+.icon .search-box {
+  width: 380px;
+  flex-shrink: 0; /* ❗ GIỮ NGUYÊN SIZE */
+}
+/* ===== HEADER BEAUTIFY FIX ===== */
+
+/* Header tổng */
+header {
+  background-color: var(--third-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Sub-header gọn lại */
+
+
+/* Logo nhỏ lại cho cân */
+.sub-header-img {
+  margin-left: -8px;   /* ❗ chỉnh rất nhẹ */
+}
+
+.sub-header img {
+  max-height: 52px;
+}
+
+
+/* Menu căn giữa đẹp hơn */
+.menu {
+  gap: 8px;
+}
+
+.menu_link {
+  padding: 8px 12px;
+  font-size: 1.6rem;
+}
+
+/* Icon list gom gọn */
+header .icon-list {
+  gap: 14px;
+}
+
+/* ICON */
+.header-cart i,
+.icon-user i {
+  font-size: 1.6rem;
+}
+
+/* Badge giỏ hàng */
+.numProCart {
+  top: -6px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+/* Hover icon mượt */
+.icon a:hover i {
+  transform: scale(1.1);
+  transition: 0.2s ease;
+}
+/* MENU THẲNG 1 HÀNG */
+.menu {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;     /* ❗ KHÔNG XUỐNG DÒNG */
+}
+
+.menu_item {
+  white-space: nowrap;  /* ❗ KHÔNG TỰ XUỐNG DÒNG */
+}
+/* ===== HEADER COMPACT FIX ===== */
+
+/* Menu chữ nhỏ lại + gần nhau hơn */
+.menu_link {
+  font-size: 1.5rem;        /* nhỏ hơn */
+  padding: 6px 10px;        /* sát lại */
+}
+
+.menu {
+  gap: 0px;                 /* giảm khoảng cách menu */
+}
+
+
+
+/* Icon list sát lại */
+header .icon-list {
+  gap:5px;                /* ❗ GẦN HƠN */
+}
+
+
+/* ===== USER DROPDOWN MENU ===== */
+.icon-user {
+  position: relative;
+}
+
+/* Menu */
+.menu-user {
+  position: absolute;
+  top: 120%;               /* ❗ SÁT DƯỚI ICON */
+  right: 0;
+
+  width: 220px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+
+  display: none;
+  z-index: 9999;
+}
+
+
+/* Hiện menu khi hover */
+.icon-user:hover .menu-user {
+  display: block;
+}
+
+
+
+/* Divider (nếu muốn) */
+.menu-user li:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+.menu-user::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 18px;
+
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #fff;
+}
+/* ===== MENU CẤP 2 (CON CỦA TỦ) ===== */
+.sub__menu-child {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 12px);   /* lệch sang phải menu cha */
+
+  min-width: 240px;
+  background: #ffffff;       /* ❗ TRẮNG NHƯ MENU CẤP 1 */
+
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+
+  padding: 6px 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+
+  z-index: 10001;            /* ❗ CAO – KHÔNG BỊ CHÌM */
+}
+.menu_parent:hover .sub__menu-child {
+  opacity: 1;
+  visibility: visible;
+}
+.sub__menu-child-item a {
+  display: block;
+  padding: 10px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+}
+
+.sub__menu-child-item a:hover {
+  background-color: #edf3f1; /* giống menu cấp 1 */
+  color: #2f6f55;
+}
