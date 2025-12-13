@@ -19,39 +19,71 @@
         $message = "Internal error: model file not found.";
     }
 
-    if(isset($_POST["submit_register"]) && $_POST["submit_register"] ) {
-      if( (isset($_POST["fullname"]) && $_POST["fullname"]) && (isset($_POST["userName"]) && $_POST["userName"])
-      && (isset($_POST["password"]) && $_POST["password"]) && (isset($_POST["phone"]) && $_POST["phone"]) 
-      && (isset($_POST["email"]) && $_POST["email"]) && (isset($_POST["address"]) && $_POST["address"]) ) {
-          
-          // Verify CAPTCHA
-          $captcha_input = $_POST['captcha_code'] ?? '';
-          $captcha_session = $_SESSION['captcha_code'] ?? '';
-          
-          if (empty($captcha_input)) {
-              $message = "Vui lòng nhập mã xác nhận";
-          } elseif (strtolower($captcha_input) !== strtolower($captcha_session)) {
-              $message = "Mã xác nhận không đúng. Vui lòng thử lại.";
-              // Xóa mã cũ để tạo mã mới
-              unset($_SESSION['captcha_code']);
-          } else {
-              // CAPTCHA đúng, tiến hành đăng ký
-              if ($Authen) {
-                  $fullName = $_POST["fullname"];
-                  $userName  = $_POST["userName"];
-                  $password  = $_POST["password"];
-                  $phone  = $_POST["phone"];
-                  $email  = $_POST["email"];
-                  $address  = $_POST["address"];
-                  $message = $Authen->register($fullName,$userName,$password,$phone,$address,$email);
-              } else {
-                  $message = isset($message) ? $message : "Internal error: cannot process registration.";
-              }
-              // Xóa mã captcha sau khi sử dụng
-              unset($_SESSION['captcha_code']);
-          }
-      }
+    // ================= HANDLE REGISTER =================
+if (isset($_POST["submit_register"])) {
+
+    if (
+        empty($_POST["fullname"]) ||
+        empty($_POST["userName"]) ||
+        empty($_POST["password"]) ||
+        empty($_POST["phone"]) ||
+        empty($_POST["email"]) ||
+        empty($_POST["address"])
+    ) {
+        $message = "Vui lòng nhập đầy đủ thông tin.";
+    } else {
+
+        $email = trim($_POST["email"]);
+        $password = $_POST["password"];
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $message = "Email không đúng định dạng.";
+        }
+        elseif (preg_match('/\s/', $email)) {
+            $message = "Email không được chứa khoảng trắng.";
+        }
+        elseif (
+            strlen($password) < 8 ||
+            !preg_match('/[A-Z]/', $password) ||
+            !preg_match('/[a-z]/', $password) ||
+            !preg_match('/[0-9]/', $password) ||
+            !preg_match('/[\W]/', $password)
+        ) {
+            $message = "Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+        }
+        else {
+
+            $captcha_input = $_POST['captcha_code'] ?? '';
+            $captcha_session = $_SESSION['captcha_code'] ?? '';
+
+            if (empty($captcha_input)) {
+                $message = "Vui lòng nhập mã xác nhận.";
+            }
+            elseif (strtolower($captcha_input) !== strtolower($captcha_session)) {
+                $message = "Mã xác nhận không đúng. Vui lòng thử lại.";
+                unset($_SESSION['captcha_code']);
+            }
+            else {
+                if ($Authen) {
+                    $message = $Authen->register(
+                        $_POST["fullname"],
+                        $_POST["userName"],
+                        $password,
+                        $_POST["phone"],
+                        $_POST["address"],
+                        $email
+                    );
+                } else {
+                    $message = "Internal error: cannot process registration.";
+                }
+                unset($_SESSION['captcha_code']);
+            }
+        }
     }
+}
+
+
+         
 ?>
 <div class="sign-up-wrapper">
   <div class="sign-up-container">
@@ -67,10 +99,20 @@
 
         <div class="input-box form-group">
           <span class="details">Password</span>
-          <!-- Change input type to password -->
-          <input id="user" name="password" type="password" class="form-control" placeholder="Enter your password" />
-          <div class="form-message"></div>
+          <input name="password"
+              type="password"
+              class="form-control"
+              placeholder="Enter your password"
+              required
+              minlength="8"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$"
+              oninvalid="this.setCustomValidity('Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.')"
+              oninput="this.setCustomValidity('')" />
+          <div class="password-hint">
+            • Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt
+          </div>
         </div>
+
 
         <div class="input-box form-group">
           <span class="details">Fullname</span>
