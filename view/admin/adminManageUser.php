@@ -1,245 +1,169 @@
 <?php
-include_once('./model/user.classes.php');
+require_once __DIR__ . '/../../model/user.classes.php';
 $User = new User();
 
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$page  = $_GET['page'] ?? 1;
+$limit = 5;
+$start = ($page - 1) * $limit;
 
-// Delete user
-if(isset($_GET['delete_user'])) {
+/* ===== LẤY GIÁ TRỊ FILTER ===== */
+$keyword = $_GET['keyword'] ?? '';
+$day     = $_GET['day'] ?? ''; // ✅ CHỈ 1 NGÀY
+
+/* ================= DELETE USER ================= */
+if (isset($_GET['delete_user'])) {
     $User->deleteUser($_GET['delete_user']);
+    header("Location: ?quanly=admin&action=manageUser");
+    exit;
 }
 
-/* =======================
-   ⭐ Hàm che mật khẩu (mask)
-   ======================= */
-function maskPassword($password) {
-    $len = strlen($password);
-    if ($len <= 3) return "***";
-    return substr($password, 0, 3) . str_repeat("*", $len - 3);
+/* ================= IMPORT CSV ================= */
+if (isset($_POST['import_user'])) {
+    if (!empty($_FILES['csv_file']['tmp_name'])) {
+        $User->importUserFromCSV($_FILES['csv_file']['tmp_name']);
+        header("Location: ?quanly=admin&action=manageUser");
+        exit;
+    }
+}
+
+/* ================= LOAD DATA ================= */
+if ($keyword || $day) {
+    // ✅ lọc theo keyword + 1 ngày
+    $userList = $User->filterUsers($keyword, $day, null, $start, $limit);
+} else {
+    $userList = $User->getUsersLimit($start, $limit);
 }
 ?>
 
 <style>
-/* ======= TABLE WRAPPER ======= */
-.table-wrapper {
-    background: #fff;
-    padding: 22px;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    font-family: "Lato", Arial, sans-serif;
+.table-wrapper{
+    background:#fff;
+    padding:22px;
+    border-radius:14px;
+    box-shadow:0 6px 20px rgba(0,0,0,.06)
 }
-
-/* ======= TOP ACTION BAR ======= */
-.user-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
+.user-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px
 }
-
-.user-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.user-actions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap
 }
-
-.search-input {
-    height: 38px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 0 12px;
-    min-width: 250px;
+.user-actions input{
+    padding:7px 10px;
+    border-radius:6px;
+    border:1px solid #ccc
 }
-
-/* BUTTONS */
-.btn {
-    padding: 7px 16px;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    border: none;
+.btn{
+    padding:7px 14px;
+    border-radius:8px;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    text-decoration:none
 }
-
-.btn-search { background: #4ea3ff; }
-.btn-reset { background: #909090; }
-
-.btn-search:hover,
-.btn-reset:hover {
-    opacity: .85;
-}
-
-/* ======= TABLE ======= */
-table.modern-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-}
-
-table.modern-table thead tr {
-    background: #f7f7f7;
-    border-bottom: 2px solid #e0e0e0;
-}
-
-table.modern-table th, 
-table.modern-table td {
-    padding: 14px 12px;
-    text-align: left;
-}
-
-table.modern-table tbody tr {
-    border-bottom: 1px solid #eee;
-    transition: 0.25s;
-}
-
-table.modern-table tbody tr:hover {
-    background: #fafafa;
-}
-
-/* ACTION BUTTONS */
-.btn-edit {
-    background: #4ea3ff;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 8px;
-    text-decoration:none;
-}
-
-.btn-delete {
-    background: #ff4c4c;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 8px;
-    text-decoration:none;
-}
-.btn-edit:hover, .btn-delete:hover { opacity: .9; }
-
-/* Pagination */
-.pagination {
-    margin-top: 18px;
-    text-align: center;
-}
-
-.pagination .page-number {
-    display: inline-block;
-    padding: 8px 12px;
-    background: #eee;
-    margin: 0 4px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.pagination .active {
-    background: #4ea3ff;
-    color: #fff;
-}
+.btn-search{background:#4ea3ff}
+.btn-reset{background:#999}
+.btn-add{background:#2ecc71}
+.btn-export{background:#f39c12}
+.btn-import{background:#8e44ad}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #eee}
+thead{background:#f7f7f7}
+tbody tr:hover{background:#fafafa}
+.action-icons a{margin-right:8px}
 </style>
 
 <div class="table-wrapper">
 
-    <div class="user-topbar">
-        <h2 style="margin:0; color:#c59b51;">Table User</h2>
+<div class="user-topbar">
+    <h2 style="color:#c59b51">Table User</h2>
 
-        <!-- ⭐ Search + Buttons + Add New -->
-        <div class="user-actions">
-            <input type="text" 
-                   id="search-user" 
-                   class="search-input" 
-                   placeholder="Tìm theo tên / email / sđt / địa chỉ / ID"
-                   value="<?= isset($_GET['keyword']) ? $_GET['keyword'] : '' ?>">
+    <div class="user-actions">
+        <!-- SEARCH TEXT -->
+        <input id="kw" placeholder="Search name / email / phone"
+               value="<?= htmlspecialchars($keyword) ?>">
 
-            <button class="btn btn-search" onclick="searchUser()">Search</button>
-            <button class="btn btn-reset" onclick="resetSearch()">Reset</button>
+        <!-- FILTER 1 DAY -->
+        <input type="date" id="day" value="<?= $day ?>">
 
-            <a href="?quanly=admin&action=insertUser" 
-               class="btn-edit" 
-               style="background:#3ecf63;">+ Add New</a>
-        </div>
+        <button class="btn btn-search" onclick="search()">Search</button>
+        <button class="btn btn-reset" onclick="reset()">Reset</button>
+
+        <a href="./view/admin/exportUsers.php"
+           class="btn btn-export"
+           target="_blank">Export CSV</a>
+
+        <form method="POST" enctype="multipart/form-data" style="display:inline">
+            <label class="btn btn-import">
+                Import CSV
+                <input type="file" name="csv_file" hidden onchange="this.form.submit()">
+            </label>
+            <input type="hidden" name="import_user">
+        </form>
+
+        <a href="?quanly=admin&action=insertUser" class="btn btn-add">+ Add</a>
     </div>
+</div>
 
-    <?php
-        $userPerPage = 5;
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Phone</th>
+    <th>Role</th>
+    <th>Created At</th>
+    <th>Action</th>
+</tr>
+</thead>
 
-        if(isset($_GET['keyword']) && $_GET['keyword'] !== "") {
+<tbody>
+<?php foreach ($userList as $u): ?>
+<tr>
+    <td><?= $u['id_user'] ?></td>
+    <td><?= $u['user_name'] ?></td>
+    <td><?= $u['user_email'] ?></td>
+    <td><?= $u['user_phone'] ?></td>
+    <td><?= $u['user_role'] == 1 ? 'Admin' : 'User' ?></td>
+    <td><?= date('d/m/Y H:i', strtotime($u['created_at'])) ?></td>
 
-            $keyword = $_GET['keyword'];
-            $searchResult = $User->searchUser($keyword, $page, $userPerPage);
-
-            $countUsers = $searchResult['countTotalUser']; 
-            $userList  = $searchResult['data'];
-
-            $countPage = ceil($countUsers / $userPerPage);
-
-        } else {
-            $countUsers = $User->getCountUsers();
-            $countPage = ceil($countUsers / $userPerPage);
-            $start = ($page - 1) * $userPerPage;
-            $userList = $User->getUsersLimit($start, $userPerPage);
-        }
-    ?>
-
-    <table class="modern-table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>SĐT</th>
-                <th>Địa chỉ</th>
-                <th>Tài khoản</th>
-                <th>Mật khẩu</th>
-                <th>Role</th>
-                <th>Điểm</th>
-                <th style="text-align:center;">Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        <?php foreach($userList as $user): ?>
-            <tr>
-                <td><?= $user['id_user'] ?></td>
-                <td><?= $user['user_name'] ?></td>
-                <td><?= $user['user_email'] ?></td>
-                <td><?= $user['user_phone'] ?></td>
-                <td><?= $user['user_address'] ?></td>
-                <td><?= $user['accountName_user'] ?></td>
-                <td><?= maskPassword($user['user_password']) ?></td>
-                <td><?= $user['user_role'] == '1' ? 'Admin' : 'User' ?></td>
-                <td><?= $user['point_available'] ?></td>
-
-                <td style="text-align:center;">
-                    <a class="btn-edit" 
-                       href="?quanly=admin&action=changeUser&id_user=<?= $user['id_user'] ?>">✏</a>
-
-                    <a class="btn-delete"
-                       onclick="return confirm('Xóa user này?')"
-                       href="?quanly=admin&action=manageUser&delete_user=<?= $user['id_user'] ?>">🗑</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <!-- PAGINATION -->
-    <div class="pagination">
-        <?php for($i = 1; $i <= $countPage; $i++): ?>
-            <a href="?quanly=admin&action=manageUser&page=<?= $i ?>&keyword=<?= isset($_GET['keyword']) ? $_GET['keyword'] : '' ?>"
-               class="page-number <?= $i == $page ? 'active' : '' ?>">
-               <?= $i ?>
-            </a>
-        <?php endfor; ?>
-    </div>
+    <td class="action-icons">
+        <a href="?quanly=admin&action=detailUser&id_user=<?= $u['id_user'] ?>">👁</a>
+        <a href="?quanly=admin&action=changeUser&id_user=<?= $u['id_user'] ?>">✏</a>
+        <a onclick="return confirm('Xóa user này?')"
+           href="?quanly=admin&action=manageUser&delete_user=<?= $u['id_user'] ?>">🗑</a>
+    </td>
+</tr>
+<?php endforeach ?>
+</tbody>
+</table>
 
 </div>
 
 <script>
-function searchUser() {
-    let keyword = document.getElementById("search-user").value;
-    window.location.href = "?quanly=admin&action=manageUser&keyword=" + keyword;
+function search(){
+    let url = '?quanly=admin&action=manageUser';
+
+    if(kw.value.trim()){
+        url += '&keyword=' + encodeURIComponent(kw.value);
+    }
+
+    if(day.value){
+        url += '&day=' + day.value;
+    }
+
+    location.href = url;
 }
 
-function resetSearch() {
-    window.location.href = "?quanly=admin&action=manageUser";
+function reset(){
+    location.href='?quanly=admin&action=manageUser';
 }
 </script>
+

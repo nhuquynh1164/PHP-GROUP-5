@@ -6,17 +6,6 @@ $Comment = new Comment();
 if(isset($_GET['delete_comment'])) {
     $Comment->deleteComment($_GET['delete_comment']);
 }
-
-// Accept
-if(isset($_GET['accept_comment'])) {
-    $Comment->acceptComment($_GET['accept_comment']);
-}
-
-// View detail
-$commentDetail = null;
-if(isset($_GET['id_comment'])) {
-    $commentDetail = $Comment->getCommentById($_GET['id_comment']);
-}
 ?>
 
 <style>
@@ -97,21 +86,8 @@ table.modern-table tbody tr:hover {
     cursor: pointer;
 }
 
-.btn-search:hover,
-.btn-reset:hover {
-    opacity: 0.85;
-}
-
 .status.info {
     background: #007bff;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 8px;
-    text-decoration: none;
-}
-
-.status.pending {
-    background: #ff9800;
     color: #fff;
     padding: 6px 12px;
     border-radius: 8px;
@@ -124,16 +100,6 @@ table.modern-table tbody tr:hover {
     padding: 6px 12px;
     border-radius: 8px;
     text-decoration: none;
-}
-
-/* ===== DETAIL BOX ===== */
-.comment-detail-box {
-    margin-top: 25px;
-    background: #fafafa;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #ddd;
-    max-width: 480px;
 }
 </style>
 
@@ -169,6 +135,7 @@ table.modern-table tbody tr:hover {
                 <th>User</th>
                 <th>Sản phẩm</th>
                 <th>Nội dung</th>
+                <th>Ngày comment</th>
                 <th style="text-align:center;">Hành động</th>
             </tr>
         </thead>
@@ -180,17 +147,13 @@ table.modern-table tbody tr:hover {
                 <td><?= $c['user_name'] ?></td>
                 <td><?= $c['title_product'] ?></td>
                 <td><?= $c['comment_content'] ?></td>
+                <td><?= date('d/m/Y H:i', strtotime($c['created_at'])) ?></td>
 
                 <td style="text-align:center;">
                     <a class="status info"
-                       href="?quanly=admin&action=detailComment&id_comment=<?= $c['id_comment'] ?>">Xem</a>
-
-                    <?php if($c['accept'] == 0): ?>
-                        <a class="status pending"
-                           href="?quanly=admin&action=manageComment&accept_comment=<?= $c['id_comment'] ?>">
-                           Duyệt
-                        </a>
-                    <?php endif; ?>
+                       href="?quanly=admin&action=detailComment&id_comment=<?= $c['id_comment'] ?>">
+                        Xem
+                    </a>
 
                     <a class="status return"
                        onclick="return confirm('Xóa bình luận này?')"

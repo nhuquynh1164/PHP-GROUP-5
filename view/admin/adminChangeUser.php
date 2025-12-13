@@ -69,9 +69,12 @@
 
         <div class="form-group">
             <label for="email" class="form-label">Email</label>
-            <input id="email" name="email" type="text" placeholder="VD: ltt@gmail.com" class="form-control"
-                autocomplete="off" value = "<?php echo $row_user['user_email'] ?>">
-            <span class="form-message"></span>
+            <input id="email" name="email" type="text" class="form-control"
+       value="<?php echo $row_user['user_email'] ?>" readonly>
+
+<input type="hidden" name="email"
+       value="<?php echo $row_user['user_email'] ?>">
+
         </div>
 
         <div class="form-group">
