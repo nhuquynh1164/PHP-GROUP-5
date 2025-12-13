@@ -148,7 +148,6 @@ if (isset($_POST["submit_register"])) {
     </form>
   </div>
 </div>
-
 <script>
 /*
 function refreshCaptcha() {
