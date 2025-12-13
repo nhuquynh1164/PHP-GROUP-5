@@ -1,25 +1,25 @@
 <?php
-    // Start session only if not already active
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
+// Start session only if not already active
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
-    // Fix include path to the model and add defensive checks
-    $modelPath = __DIR__ . '/../../model/authen.classes.php';
-    if (file_exists($modelPath)) {
-        include_once($modelPath);
-        if (class_exists('Authen')) {
-            $Authen = new Authen();
-        } else {
-            $Authen = null;
-            $message = "Internal error: authentication module not available.";
-        }
+// Fix include path to the model and add defensive checks
+$modelPath = __DIR__ . '/../../model/authen.classes.php';
+if (file_exists($modelPath)) {
+    include_once($modelPath);
+    if (class_exists('Authen')) {
+        $Authen = new Authen();
     } else {
         $Authen = null;
-        $message = "Internal error: model file not found.";
+        $message = "Internal error: authentication module not available.";
     }
+} else {
+    $Authen = null;
+    $message = "Internal error: model file not found.";
+}
 
-    // ================= HANDLE REGISTER =================
+// ================= HANDLE REGISTER =================
 if (isset($_POST["submit_register"])) {
 
     if (
@@ -38,11 +38,9 @@ if (isset($_POST["submit_register"])) {
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $message = "Email không đúng định dạng.";
-        }
-        elseif (preg_match('/\s/', $email)) {
+        } elseif (preg_match('/\s/', $email)) {
             $message = "Email không được chứa khoảng trắng.";
-        }
-        elseif (
+        } elseif (
             strlen($password) < 8 ||
             !preg_match('/[A-Z]/', $password) ||
             !preg_match('/[a-z]/', $password) ||
@@ -50,9 +48,9 @@ if (isset($_POST["submit_register"])) {
             !preg_match('/[\W]/', $password)
         ) {
             $message = "Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
-        }
-        else {
+        } else {
 
+            /*
             $captcha_input = $_POST['captcha_code'] ?? '';
             $captcha_session = $_SESSION['captcha_code'] ?? '';
 
@@ -64,6 +62,8 @@ if (isset($_POST["submit_register"])) {
                 unset($_SESSION['captcha_code']);
             }
             else {
+            */
+
                 if ($Authen) {
                     $message = $Authen->register(
                         $_POST["fullname"],
@@ -76,14 +76,14 @@ if (isset($_POST["submit_register"])) {
                 } else {
                     $message = "Internal error: cannot process registration.";
                 }
+
+            /*
                 unset($_SESSION['captcha_code']);
             }
+            */
         }
     }
 }
-
-
-         
 ?>
 <div class="sign-up-wrapper">
   <div class="sign-up-container">
@@ -94,7 +94,6 @@ if (isset($_POST["submit_register"])) {
         <div class="input-box form-group">
           <span class="details">Username</span>
           <input id="user" name="userName" type="text" class="form-control" placeholder="Enter your username" />
-          <div class="form-message"></div>
         </div>
 
         <div class="input-box form-group">
@@ -105,68 +104,57 @@ if (isset($_POST["submit_register"])) {
               placeholder="Enter your password"
               required
               minlength="8"
-              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$"
-              oninvalid="this.setCustomValidity('Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.')"
-              oninput="this.setCustomValidity('')" />
-          <div class="password-hint">
-            • Tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt
-          </div>
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$" />
         </div>
-
 
         <div class="input-box form-group">
           <span class="details">Fullname</span>
-          <input id="user" name="fullname" type="text" class="form-control" placeholder="Enter your fullname" />
-          <div class="form-message"></div>
+          <input name="fullname" type="text" class="form-control" placeholder="Enter your fullname" />
         </div>
 
         <div class="input-box form-group">
           <span class="details">Phone</span>
-          <input id="user" name="phone" type="text" class="form-control" placeholder="Enter your phone" />
-          <div class="form-message"></div>
+          <input name="phone" type="text" class="form-control" placeholder="Enter your phone" />
         </div>
 
         <div class="input-box form-group">
           <span class="details">Email</span>
-          <input id="user" name="email" type="text" class="form-control" placeholder="Enter your email" />
-          <div class="form-message"></div>
+          <input name="email" type="text" class="form-control" placeholder="Enter your email" />
         </div>
 
         <div class="input-box form-group">
           <span class="details">Address</span>
-          <input id="user" name="address" type="text" class="form-control" placeholder="Enter your address" />
-          <div class="form-message"></div>
+          <input name="address" type="text" class="form-control" placeholder="Enter your address" />
         </div>
       </div>
-      <!-- Gender -->
-      
-      <!-- CAPTCHA -->
+
+      <?php /* ?>
       <div class="captcha-container" style="margin: 20px 0;">
         <div class="input-box form-group">
           <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
-            <img id="captcha-image" src="../public/captcha.php" alt="CAPTCHA" style="border: 1px solid #ccc; border-radius: 5px;">
-            <button type="button" onclick="refreshCaptcha()" style="padding: 8px 12px; cursor: pointer; background: #4070f4; color: white; border: none; border-radius: 5px;" title="Tải lại mã">
-              <i class="fa-solid fa-rotate-right"></i> Tải lại
-            </button>
+            <img id="captcha-image" src="../public/captcha.php" alt="CAPTCHA">
+            <button type="button" onclick="refreshCaptcha()">Tải lại</button>
           </div>
-          <span class="details">Nhập mã xác nhận</span>
-          <input id="captcha" name="captcha_code" type="text" class="form-control" placeholder="Nhập mã từ hình trên" required />
-          <div class="form-message"></div>
+          <input id="captcha" name="captcha_code" type="text" class="form-control">
         </div>
       </div>
-      
-        <div class="container-btn-sm">
-          <div class="sign-up-btn">
-            <input id="register" name='submit_register' type="submit" value="Sign Up">
-          </div>
-        </div>
+      <?php */ ?>
 
+      <div class="container-btn-sm">
+        <div class="sign-up-btn">
+          <input id="register" name="submit_register" type="submit" value="Sign Up">
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
-<!-- CAPTCHA Script -->
 <script>
+/*
 function refreshCaptcha() {
-    document.getElementById('captcha-image').src = '../public/captcha.php?' + Math.random();
+    document.getElementById('captcha-image').src =
+        '../public/captcha.php?' + Math.random();
     document.getElementById('captcha').value = '';
 }
+*/
 </script>

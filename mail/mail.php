@@ -1,12 +1,11 @@
 <?php
-include "PHPMailer-master/src/PHPMailer.php";
-include "PHPMailer-master/src/Exception.php";
-include "PHPMailer-master/src/OAuth.php";
-include "PHPMailer-master/src/POP3.php";
-include "PHPMailer-master/src/SMTP.php";
- 
+require_once __DIR__ . '/PHPMailer-master/src/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer-master/src/SMTP.php';
+require_once __DIR__ . '/PHPMailer-master/src/Exception.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 
 function sendMail($id_user,$gmail,$fullName) {
     $mail = new PHPMailer(true);
