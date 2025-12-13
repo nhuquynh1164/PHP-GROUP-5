@@ -107,6 +107,19 @@ class Category extends DB {
         $result = $stmt->fetchAll();
         return ["countTotalCategory" => $countTotalCategory, "data" => $result];
     }
+    // Kiểm tra danh mục có danh mục con không
+public function hasChildCategory($id) {
+    $sql = "SELECT COUNT(*) AS total FROM category WHERE parent_id = $id";
+    $result = $this->connect()->query($sql)->fetch_assoc();
+    return $result['total'] > 0;
+}
+
+// Xóa danh mục (chỉ dùng khi KHÔNG có con)
+public function deleteCategoryById($id) {
+    $sql = "DELETE FROM category WHERE id = $id";
+    return $this->connect()->query($sql);
+}
+
     
 }
 ?>
