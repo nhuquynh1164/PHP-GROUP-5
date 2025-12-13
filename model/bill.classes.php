@@ -86,5 +86,19 @@ class Bill extends DB {
         // }
         return $fetchResult;
     }
+    // Tổng số đơn hàng (đã duyệt hoặc tất cả tuỳ bạn)
+public function getTotalOrders() {
+    $sql = "SELECT COUNT(*) FROM bill";
+    $stmt = $this->connect()->query($sql);
+    return $stmt->fetchColumn();
+}
+
+// Tổng doanh thu (chỉ tính đơn đã duyệt)
+public function getTotalRevenue() {
+    $sql = "SELECT SUM(total_pay) FROM bill WHERE status = 1";
+    $stmt = $this->connect()->query($sql);
+    return $stmt->fetchColumn() ?? 0;
+}
+
 }
 ?>

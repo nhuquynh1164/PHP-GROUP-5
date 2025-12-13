@@ -1,125 +1,189 @@
 <?php
+require_once __DIR__ . '/db.classes.php';
 
 class User extends DB {
 
+
+    /* =======================
+       GET USER
+    ======================= */
     public function getUsers() {
-        $sql = "Select * from user";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->fetchAll();
+        $sql = "SELECT * FROM user ORDER BY id_user DESC";
+        return $this->connect()->query($sql)->fetchAll();
     }
+
+    // ✅ SỬA CHUẨN
+    public function getUserById($id_user) {
+        $sql = "SELECT * FROM user WHERE id_user = ?";
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([$id_user]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getUserId($id) {
-        $sql = "Select * from user WHERE id_user = $id";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->fetchAll();
-    }
-    public function getUsersLimit($start,$count) {
-        $sql = "Select * from user ORDER BY id_user DESC LIMIT $start, $count ";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->fetchAll();
-    }
-    public function countUsers() {
-        $sql = "Select * from user where user_role = 0";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->rowCount();
-    }
-    public function countAdmins() {
-        $sql = "Select * from user where user_role = 1";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->rowCount();
-    }
-    public function getCountUsers() {
-        $sql = "Select * from user";
-        $stmt = $this->connect()->query($sql);
-        return $stmt->rowCount();
-    }
-    public function insertUser($fullName,$userName,$password,$phone,$address,$email,$role) {
-        $sql = "INSERT INTO user
-        (`user_name`, `user_phone`, `user_address`, `user_email`, `accountName_user`, `user_password`, `user_role`)
-        VALUES (?, ?, ?, ?, ?, ?, ?)";;
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$fullName,$phone,$address,$email,$userName,$password,$role]);
-        header("Location:index.php?quanly=admin&action=manageUser");
-    }
-    public function updateUser($fullName,$userName,$password,$phone,$address,$email,$role,$id_user) {
-        $sql = "UPDATE user 
-        SET `user_name` = ?, user_phone = ?, user_address = ?, user_email = ?, accountName_user = ?,user_password = ?,user_role = ?
-        WHERE id_user = ?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$fullName,$phone,$address,$email,$userName,$password,$role,$id_user]);
-        header("Location:index.php?quanly=admin&action=manageUser");
-    }
-    public function addPointUser($point,$id_user) {
-        $sql = "UPDATE `user` SET point_available = point_available + $point WHERE id_user = $id_user";
-        $stmt = $this->connect()->query($sql);
-        echo "<script type='text/javascript'>alert('Chúc mừng, bạn vừa nhận được $point điểm thưởng, điểm thưởng sẽ được cộng vào ví và sử dụng khi thanh toán hóa đơn');</script>";
-    }
-    public function deletePointUser($point,$id_user) {
-        $sql = "UPDATE `user` SET point_available = point_available - $point WHERE id_user = $id_user";
-        $stmt = $this->connect()->query($sql);
-        echo "<script type='text/javascript'>alert('Chúc mừng, bạn vừa nhận được $point điểm thưởng, điểm thưởng sẽ được cộng vào ví và sử dụng khi thanh toán hóa đơn');</script>";
-    }
-    public function changeInfoUser($fullName,$password,$phone,$address,$email,$id_user) {
-        $sql = "UPDATE user 
-        SET `user_name` = ?, user_phone = ?, user_address = ?, user_email = ?,user_password = ? WHERE id_user = ?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$fullName,$phone,$address,$email,$password,$id_user]);
-        header("Location:index.php?quanly=user");
-    }
-    public function changePasswordUser($password,$id_user) {
-        $sql = "UPDATE user SET user_password = ? WHERE id_user = ?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$password,$id_user]);
-        echo "
-        <SCRIPT> 
-            alert('Mật khẩu của bạn đã được đổi mới')
-            window.location.replace('index.php?quanly=login');
-        </SCRIPT>";
-    }
-    public function deleteUser($id) {
-        $sql = "DELETE FROM user WHERE id_user = ?";
+        $sql = "SELECT * FROM user WHERE id_user = ?";
         $stmt = $this->connect()->prepare($sql);
         $stmt->execute([$id]);
+        return $stmt->fetchAll();
     }
+
+    public function getUsersLimit($start,$count) {
+        $sql = "SELECT * FROM user ORDER BY id_user DESC LIMIT $start,$count";
+        return $this->connect()->query($sql)->fetchAll();
+    }
+
+    public function countUsers() {
+        return $this->connect()->query("SELECT * FROM user WHERE user_role = 0")->rowCount();
+    }
+
+    public function countAdmins() {
+        return $this->connect()->query("SELECT * FROM user WHERE user_role = 1")->rowCount();
+    }
+
+    public function getCountUsers() {
+        return $this->connect()->query("SELECT * FROM user")->rowCount();
+    }
+
+    //LỌC THEO NGÀY TẠO TÀI KHOẢN
+public function filterUsers($keyword = '', $day = '', $to_date = null, $start = 0, $limit = 5)
+{
+    // ⚠️ ĐÚNG TÊN BẢNG
+    $sql = "SELECT * FROM user WHERE 1=1";
+    $params = [];
+
+    /* ===== SEARCH KEYWORD ===== */
+    if (!empty($keyword)) {
+        $sql .= " AND (
+            user_name LIKE :kw
+            OR user_email LIKE :kw
+            OR user_phone LIKE :kw
+        )";
+        $params[':kw'] = '%' . $keyword . '%';
+    }
+
+    /* ===== FILTER 1 DAY ===== */
+    if (!empty($day)) {
+        $sql .= " AND DATE(created_at) = :day";
+        $params[':day'] = $day;
+    }
+
+    /* ===== ORDER + LIMIT (KHÔNG BIND LIMIT) ===== */
+    $start = (int)$start;
+    $limit = (int)$limit;
+    $sql .= " ORDER BY created_at DESC LIMIT $start, $limit";
+
+    // ⚠️ DÙNG connect()
+    $stmt = $this->connect()->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+    /* =======================
+       INSERT USER
+    ======================= */
+    public function insertUser($fullName,$userName,$password,$phone,$address,$email,$role) {
+        $sql = "INSERT INTO user
+        (user_name,user_phone,user_address,user_email,accountName_user,user_password,user_role,created_at)
+        VALUES (?,?,?,?,?,?,?,NOW())";
+
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([$fullName,$phone,$address,$email,$userName,$password,$role]);
+
+        header("Location:index.php?quanly=admin&action=manageUser");
+    }
+
+    /* =======================
+       UPDATE USER
+    ======================= */
+    public function updateUser($fullName,$userName,$password,$phone,$address,$email,$role,$id_user) {
+        $sql = "UPDATE user SET
+                user_name=?,
+                user_phone=?,
+                user_address=?,
+                user_email=?,
+                accountName_user=?,
+                user_password=?,
+                user_role=?
+                WHERE id_user=?";
+
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->execute([$fullName,$phone,$address,$email,$userName,$password,$role,$id_user]);
+
+        header("Location:index.php?quanly=admin&action=manageUser");
+    }
+
+    /* =======================
+       DELETE USER
+    ======================= */
+    public function deleteUser($id) {
+        $stmt = $this->connect()->prepare("DELETE FROM user WHERE id_user=?");
+        $stmt->execute([$id]);
+    }
+
+    /* =======================
+       SEARCH USER
+    ======================= */
     public function searchUser($keyword, $page, $limit) {
 
-    $start = ($page - 1) * $limit;
+        $start = ($page - 1) * $limit;
+        $kw = "%$keyword%";
 
-    // Sử dụng LIKE cho tất cả trường
-    $sql = "SELECT * FROM user 
-            WHERE user_name LIKE :kw
-               OR user_email LIKE :kw
-               OR user_phone LIKE :kw
-               OR user_address LIKE :kw
-               OR id_user LIKE :kw";
+        $sql = "SELECT * FROM user
+                WHERE user_name LIKE :kw
+                   OR user_email LIKE :kw
+                   OR user_phone LIKE :kw
+                   OR user_address LIKE :kw
+                   OR id_user LIKE :kw";
 
-    // Query đếm tổng
-    $stmt = $this->connect()->prepare($sql);
-    $kw = "%$keyword%";
-    $stmt->bindParam(':kw', $kw);
-    $stmt->execute();
-    $countTotalUser = $stmt->rowCount();
+        $stmt = $this->connect()->prepare($sql);
+        $stmt->bindParam(':kw', $kw);
+        $stmt->execute();
+        $count = $stmt->rowCount();
 
-    // Query lấy dữ liệu phân trang
-    $sqlResult = $sql . " LIMIT $start, $limit";
-    $stmt2 = $this->connect()->prepare($sqlResult);
-    $stmt2->bindParam(':kw', $kw);
-    $stmt2->execute();
-    $result = $stmt2->fetchAll();
+        $sql .= " LIMIT $start,$limit";
+        $stmt2 = $this->connect()->prepare($sql);
+        $stmt2->bindParam(':kw', $kw);
+        $stmt2->execute();
 
-    return [
-        "countTotalUser" => $countTotalUser,
-        "data" => $result
-    ];
-}
-    public function checkUserForgetPassword($userName,$email) {
-        $isCheck = false;
-        $sql = "Select * from user WHERE accountName_user = '$userName' AND user_email = '$email'";
-        $stmt = $this->connect()->query($sql);
-        $user = $stmt->fetchAll();
-        if($stmt->rowCount() >= 1) {
-            $isCheck = $user[0]['id_user'];
+        return [
+            'countTotalUser' => $count,
+            'data' => $stmt2->fetchAll()
+        ];
+    }
+
+    /* =======================
+       EXPORT USER
+    ======================= */
+    public function exportUsers() {
+        $sql = "SELECT id_user,user_name,user_email,user_phone,user_role,created_at FROM user";
+        return $this->connect()->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /* =======================
+       IMPORT USER
+    ======================= */
+    public function importUserFromCSV($fileTmp) {
+
+        $file = fopen($fileTmp, 'r');
+        fgetcsv($file);
+
+        while (($row = fgetcsv($file)) !== false) {
+
+            $sql = "INSERT INTO user
+                    (user_name,user_email,user_phone,user_role,created_at)
+                    VALUES (?,?,?,?,?)";
+
+            $stmt = $this->connect()->prepare($sql);
+            $stmt->execute([
+                $row[1],
+                $row[2],
+                $row[3],
+                $row[4],
+                $row[5]
+            ]);
         }
-        return $isCheck;
+        fclose($file);
     }
 }
-?>

@@ -2,13 +2,15 @@
     font-size: 16px;
 }
 :root {
-  --blue: #2a2185;
+  --primary-color: #0b3c5d; /* xanh đậm */
+  --primary-hover: #145da0;
   --white: #fff;
   --gray: #f5f5f5;
   --black1: #222;
   --black2: #999;
-  --hover-color: #f1f4f3;
+  --hover-color: #eaf2f8;
 }
+
 
 body {
   min-height: 100vh;
@@ -568,4 +570,51 @@ body {
     right: 0;
     left: initial;
   }
+}
+
+
+
+
+
+/* ===== SIDEBAR ADMIN FIX ===== */
+.navigation {
+  background: var(--primary-color);
+  border-left: none;
+}
+
+/* mỗi item là 1 ô */
+.navigation ul li {
+  margin: 6px 12px;
+  border-radius: 10px;
+}
+
+/* link trong ô */
+.navigation ul li a {
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+/* icon + chữ */
+.navigation ul li a .icon,
+.navigation ul li a .title {
+  color: #fff;
+}
+
+/* hover */
+.navigation ul li:hover a {
+  background: var(--primary-hover);
+  color: #fff;
+}
+
+/* active (đang chọn) */
+.navigation ul li.hovered a {
+  background: #1b6ca8;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* tắt hiệu ứng cong cũ */
+.navigation ul li a::before,
+.navigation ul li a::after {
+  display: none;
 }
