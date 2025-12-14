@@ -84,15 +84,22 @@ public function filterUsers($keyword = '', $day = '', $to_date = null, $start = 
        INSERT USER
     ======================= */
     public function insertUser($fullName,$userName,$password,$phone,$address,$email,$role) {
-        $sql = "INSERT INTO user
-        (user_name,user_phone,user_address,user_email,accountName_user,user_password,user_role,created_at)
-        VALUES (?,?,?,?,?,?,?,NOW())";
+    $sql = "INSERT INTO user
+        (user_name, user_phone, user_address, user_email,
+         accountName_user, user_password, user_role)
+        VALUES (?,?,?,?,?,?,?)";
 
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$fullName,$phone,$address,$email,$userName,$password,$role]);
-
-        header("Location:index.php?quanly=admin&action=manageUser");
-    }
+    $stmt = $this->connect()->prepare($sql);
+    $stmt->execute([
+        $fullName,
+        $phone,
+        $address,
+        $email,
+        $userName,
+        $password, // plaintext
+        $role
+    ]);
+}
 
     /* =======================
        UPDATE USER
