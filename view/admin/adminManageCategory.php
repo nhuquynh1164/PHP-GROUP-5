@@ -1,46 +1,70 @@
 <?php
-    include_once('./model/category.classes.php');
-    $Category = new Category();
+include_once('./model/category.classes.php');
+$Category = new Category();
 
-    // Lấy trang
-    $page = isset($_GET['page']) ? $_GET['page'] : 1;
+/* ================== PHÂN TRANG ================== */
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$CategoryPerPage = 5;
 
-    // Xóa danh mục
-   if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
+/* ================== XÓA DANH MỤC ================== */
+if (isset($_GET['delete_danhmuc'])) {
+    $id_danhmuc = (int)$_GET['delete_danhmuc'];
 
-    if ($category->hasChildCategory($id)) {
+    if ($Category->hasChildCategory($id_danhmuc)) {
         echo "<script>
-            alert('Không thể xóa danh mục vì còn danh mục con!');
-            window.location.href='admin.php?quanly=danhmuc';
+            alert('Không thể xóa danh mục cha vì vẫn còn danh mục con!');
+            window.location.href='?quanly=admin&action=manageCategory';
         </script>";
-    } else {
-        $category->deleteCategoryById($id);
-        echo "<script>
-            alert('Xóa danh mục thành công');
-            window.location.href='admin.php?quanly=danhmuc';
-        </script>";
+        exit;
     }
+
+    $Category->deleteCategory($id_danhmuc);
+    echo "<script>
+        alert('Xóa danh mục thành công');
+        window.location.href='?quanly=admin&action=manageCategory';
+    </script>";
+    exit;
 }
 
+/* ================== SEARCH / LOAD DATA ================== */
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-    // LẤY TOÀN BỘ CATEGORY → map ID => NAME
-    $allCategories = $Category->getCategorys();
-    $categoryMap = [];
-    foreach ($allCategories as $cat) {
-        $categoryMap[$cat['id_category']] = $cat['name_category'];
-    }
+if ($search !== '') {
+
+    // CÓ TÌM KIẾM
+    $result = $Category->searchCategory($search, $page, $CategoryPerPage);
+    $categoryList   = $result['data'];
+    $countCategorys = $result['countTotalCategory'];
+
+} else {
+
+    // KHÔNG TÌM KIẾM
+    $countCategorys = $Category->getCountCategory();
+    $start = ($page - 1) * $CategoryPerPage;
+    $categoryList = $Category->getCategorysLimit($start, $CategoryPerPage);
+}
+
+$countPage = ceil($countCategorys / $CategoryPerPage);
 ?>
 
 <div class="btn-insert">
-    <a href="?quanly=admin&action=insertCategory" class="btn">Thêm + </a>
+    <a href="?quanly=admin&action=insertCategory" class="btn">Thêm +</a>
+    <a href="?quanly=admin&action=manageCategory" class="btn">Reset</a>
 </div>
 
-<div class="search-box">
+<form method="get" class="search-box">
+    <input type="hidden" name="quanly" value="admin">
+    <input type="hidden" name="action" value="manageCategory">
+
     <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" name="search" id="search-category"
-           placeholder="Nhập tên hoặc ID Danh mục để tìm kiếm"/>
-</div>
+    <input
+        type="text"
+        name="search"
+        value="<?php echo htmlspecialchars($search); ?>"
+        placeholder="Nhập tên hoặc ID Danh mục để tìm kiếm"
+    />
+</form>
 
 <table>
     <thead>
@@ -54,43 +78,39 @@
         </tr>
     </thead>
 
-    <tbody id="result">
-        <?php
-            $CategoryPerPage = 5;
-            $countCategorys = $Category->getCountCategory();
-            $countPage = ceil($countCategorys / $CategoryPerPage);
-            $start = ($page -1) * $CategoryPerPage;
-            $categoryList = $Category->getCategorysLimit($start,$CategoryPerPage);
-
-            foreach($categoryList as $row_category ) {
-                $parentId = $row_category['parent_id'];
-                $parentName = ($parentId == 0)
-                    ? 'Danh mục gốc'
-                    : ($categoryMap[$parentId] ?? 'Không xác định');
-        ?>
+    <tbody>
+        <?php foreach ($categoryList as $row_category) { ?>
         <tr>
-            <td><?php echo $row_category['id_category'] ?></td>
+            <td><?php echo $row_category['id_category']; ?></td>
 
-            <td style="width: 10%;">
-                <img src="<?php echo $row_category['img_category'] ?>"
-                     width="100%" height="120" style="object-fit:cover;">
+            <td style="width:10%">
+                <img src="<?php echo $row_category['img_category']; ?>" width="100%" height="120" style="object-fit:cover;">
             </td>
 
-            <td><?php echo $row_category['name_category'] ?></td>
-
-            <td><?php echo $row_category['order'] ?></td>
+            <td><?php echo $row_category['name_category']; ?></td>
+            <td><?php echo $row_category['order']; ?></td>
 
             <td>
-                <?php echo $parentName ?>
+                <?php
+                    if ($row_category['parent_id'] == 0) {
+                        echo 'Danh mục gốc';
+                    } else {
+                        echo $Category->getCategoryNameById($row_category['parent_id']);
+                    }
+                ?>
             </td>
 
             <td>
-                <a href="?quanly=admin&action=changeCategory&id_danhmuc=<?php echo $row_category['id_category'] ?>"
-                   class="status pending">Sửa</a>
-
-                <a href="?quanly=admin&action=manageCategory&delete_danhmuc=<?php echo $row_category['id_category'] ?>"
-                   class="status return"
-                   onclick="return confirm('Bạn chắc chắn muốn xóa?')">Xóa</a>
+                <a href="?quanly=admin&action=changeCategory&id_danhmuc=<?php echo $row_category['id_category']; ?>" class="status pending">
+                    Sửa
+                </a>
+                <a
+                    href="?quanly=admin&action=manageCategory&delete_danhmuc=<?php echo $row_category['id_category']; ?>"
+                    class="status return"
+                    onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')"
+                >
+                    Xóa
+                </a>
             </td>
         </tr>
         <?php } ?>
@@ -98,22 +118,18 @@
 </table>
 
 <div class="pagination">
-<?php
-    for($i = 1; $i <= $countPage; $i++) {
-?>
+<?php for ($i = 1; $i <= $countPage; $i++) { ?>
     <div class="item">
         <input
-    type="radio"
-    name="nav"
-    id="input-<?php echo $i ?>"
-    class="input-page"
-    <?php echo $i == $page ? 'checked': '' ?>
-    onclick="window.location='?quanly=admin&action=manageCategory&page=<?php echo $i ?>'"
-/>
-
-        <label for="input-<?php echo $i ?>"
-               class="button button-<?php echo $i ?>">
-            <?php echo $i ?>
+            type="radio"
+            name="nav"
+            id="input-<?php echo $i; ?>"
+            class="input-page"
+            <?php echo ($i == $page) ? 'checked' : ''; ?>
+            onclick="window.location='?quanly=admin&action=manageCategory&page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>'"
+        />
+        <label for="input-<?php echo $i; ?>" class="button button-<?php echo $i; ?>">
+            <?php echo $i; ?>
         </label>
     </div>
 <?php } ?>

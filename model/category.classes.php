@@ -109,15 +109,20 @@ class Category extends DB {
     }
     // Kiểm tra danh mục có danh mục con không
 public function hasChildCategory($id) {
+    $id = (int)$id;
     $sql = "SELECT COUNT(*) AS total FROM category WHERE parent_id = $id";
-    $result = $this->connect()->query($sql)->fetch_assoc();
-    return $result['total'] > 0;
+    $stmt = $this->connect()->query($sql);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row['total'] > 0;
 }
 
-// Xóa danh mục (chỉ dùng khi KHÔNG có con)
-public function deleteCategoryById($id) {
-    $sql = "DELETE FROM category WHERE id = $id";
-    return $this->connect()->query($sql);
+// Lấy tên danh mục theo ID
+public function getCategoryNameById($id) {
+    $id = (int)$id;
+    $sql = "SELECT name_category FROM category WHERE id_category = $id";
+    $stmt = $this->connect()->query($sql);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ? $row['name_category'] : '';
 }
 
     
