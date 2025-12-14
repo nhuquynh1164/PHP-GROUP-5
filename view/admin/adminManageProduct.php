@@ -16,7 +16,7 @@
 </div>
 <div class="search-box">
     <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" name="search" id="search-product" placeholder="Nhập tên hoặc mã sản phẩm để tìm kiếm"/>
+    <input type="text" name="search" id="search-product" placeholder="Nhập tên/ID sản phẩm để tìm kiếm"/>
 </div>
 <table>
     <thead>
@@ -50,7 +50,12 @@
             <td>
                 <a href="?quanly=admin&action=detailProduct&id_sanpham=<?php echo $row_sanpham['id_product'] ?>" class="status delivered">Xem chi tiết</a>
                 <a href="?quanly=admin&action=changeProduct&id_sanpham=<?php echo $row_sanpham['id_product'] ?>" class="status pending">Sửa</a>
-                <a href="?quanly=admin&action=manageProduct&delete_sanpham=<?php echo $row_sanpham['id_product'] ?>" class="status return">Xóa</a>
+                <a href="?quanly=admin&action=manageProduct&delete_sanpham=<?php echo $row_sanpham['id_product'] ?>"
+   class="status return"
+   onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm và toàn bộ chi tiết sản phẩm không?')">
+   Xóa
+</a>
+
             </td>
         </tr>
 

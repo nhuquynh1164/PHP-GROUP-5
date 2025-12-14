@@ -95,13 +95,15 @@ $totalProducts  = $Product->getCountProducts();
                     case 'insertProduct': include 'adminInsertProduct.php'; break;
                     case 'insertCategory': include 'adminInsertCategory.php'; break;
                     case 'insertSlider': include 'adminInsertSlider.php'; break;
+                    case 'insertDetailProduct': include 'adminInsertDetailProduct.php'; break;
 
                     // Chỉnh sửa
                     case 'changeUser': include 'adminChangeUser.php'; break;
                     case 'changeProduct': include 'adminChangeProduct.php'; break;
                     case 'changeCategory': include 'adminChangeCategory.php'; break;
                     case 'changeSlider': include 'adminChangeSlider.php'; break;
-
+                    case 'changeDetailProduct':
+    include 'view/admin/adminChangeDetailProduct.php';
                     default: include 'adminOverview.php'; break;
                 }
                 ?>

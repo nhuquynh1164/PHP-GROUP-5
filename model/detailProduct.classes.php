@@ -11,13 +11,16 @@ class DetailProduct extends Product {
         $stmt = $this->connect()->query($sql);
         return $stmt->fetchAll();
     }
-    public function updateDetailProduct($inventory,$sold,$size,$price,$id_detailProduct,$id_product) {
-        $sql = "UPDATE `detailproduct` SET `inventory` = ?, `sold` = ?, `detail_size` = ?, `detail_price` = ?
-        WHERE `detailproduct`.`id_detailProduct` = ?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$inventory,$sold,$size,$price,$id_detailProduct]);
-        header("Location:index.php?quanly=admin&action=detailProduct&id_sanpham=$id_product");
-    }
+    public function updateDetailProduct($size, $price, $id_detailProduct, $id_product) {
+    $sql = "UPDATE detailproduct 
+            SET detail_size = ?, detail_price = ?
+            WHERE id_detailProduct = ?";
+    $stmt = $this->connect()->prepare($sql);
+    $stmt->execute([$size, $price, $id_detailProduct]);
+
+    header("Location:index.php?quanly=admin&action=detailProduct&id_sanpham=$id_product");
+}
+
     public function updateAmountDetailProduct($id_detailProduct,$amount) {
         $sql = "UPDATE `detailproduct` SET inventory = inventory - $amount, sold = sold + $amount 
         WHERE `id_detailProduct` = $id_detailProduct";

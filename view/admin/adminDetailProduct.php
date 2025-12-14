@@ -16,7 +16,7 @@
 <table>
     <thead>
         <tr>
-            <td>ID Sản phẩm</td>
+      <th>ID chi tiết sản phẩm</th>
             <td>Giá</td>
             <td>Size</td>
             <td>Số lượng đã bán</td>
@@ -40,7 +40,12 @@
             <td><?php echo $row_detail['inventory'] - $row_detail['sold'] ?></td>
             <td>
                 <a href="?quanly=admin&action=changeDetailProduct&id_chitietSP=<?php echo $row_detail['id_detailProduct'] ?>" class="status pending">Sửa</a>
-                <a href="?quanly=admin&action=detailProduct&id_sanpham=<?php echo $id_sanpham ?>&delete_detailProduct=<?php echo $row_detail['id_detailProduct'] ?>" class="status return">Xóa</a>
+                <a href="?quanly=admin&action=detailProduct&id_sanpham=<?php echo $id_sanpham ?>&delete_detailProduct=<?php echo $row_detail['id_detailProduct'] ?>"
+   class="status return"
+   onclick="return confirm('Bạn có chắc chắn muốn xóa chi tiết sản phẩm này không?')">
+   Xóa
+</a>
+
             </td>
         </tr>
 

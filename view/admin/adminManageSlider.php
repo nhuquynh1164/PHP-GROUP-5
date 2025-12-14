@@ -40,8 +40,12 @@
         <a href="?quanly=admin&action=changeSlider&id_slider=<?php echo $row_slider['id_slider'] ?>" 
            class="status pending">Sửa</a>
 
-        <a href="?quanly=admin&action=manageSlider&delete_slider=<?php echo $row_slider['id_slider'] ?>" 
-           class="status return">Xóa</a>
+        <a href="?quanly=admin&action=manageSlider&delete_slider=<?php echo $row_slider['id_slider'] ?>"
+   class="status return"
+   onclick="return confirm('Bạn có chắc chắn muốn xóa slider này không?');">
+   Xóa
+</a>
+
     </td>
 </tr>
 
