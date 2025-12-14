@@ -62,7 +62,7 @@ $countPage = ceil($countCategorys / $CategoryPerPage);
         type="text"
         name="search"
         value="<?php echo htmlspecialchars($search); ?>"
-        placeholder="Nhập tên hoặc ID Danh mục để tìm kiếm"
+        placeholder="Nhập tên/ID Danh mục để tìm kiếm"
     />
 </form>
 
